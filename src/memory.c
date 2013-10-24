@@ -185,10 +185,10 @@ features_block(
 }
 
 features_err_t
-features_switch_uint8_value(
+features_switch_value(
         const features_data_t *data,
         features_switch_number_t switch_number,
-        uint8_t *val) {
+        features_switch_value_t *value) {
     features_switch_info_t switch_info;
     features_err_t rc;
 
@@ -198,13 +198,74 @@ features_switch_uint8_value(
         return rc;
     }
 
+    value->type = switch_info.type;
+
     switch (switch_info.type) {
         case FEATURES_SWITCH_TYPE_UNUSED:
             return FEATURES_ERR_UNUSED;
+        case FEATURES_SWITCH_TYPE_DEPRECATED:
+            return FEATURES_ERR_DEPRECATED;
+        case FEATURES_SWITCH_TYPE_FLAG:
+            memcpy(&value->data.flag, switch_info.data, 1);
+            value->data.flag &= (1 << (switch_number % 8));
+            break;
+        case FEATURES_SWITCH_TYPE_UINT8:
+            memcpy(&value->data.uint8, switch_info.data, 1);
+            break;
+        case FEATURES_SWITCH_TYPE_UINT16:
+            value->data.uint16 = features_read_uint16(switch_info->data);
+            break;
+        case FEATURES_SWITCH_TYPE_UINT32:
+            value->data.uint32 = features_read_uint32(switch_info->data);
+            break;
+        case FEATURES_SWITCH_TYPE_UINT64:
+            value->data.uint64 = features_read_uint64(switch_info->data);
+            break;
+        case FEATURES_SWITCH_TYPE_INT8:
+            memcpy(&value->data.int8, switch_info.data, 1);
+            break;
+        case FEATURES_SWITCH_TYPE_INT16:
+            value->data.int16 = features_read_int16(switch_info->data);
+            break;
+        case FEATURES_SWITCH_TYPE_INT32:
+            value->data.int32 = features_read_int32(switch_info->data);
+            break;
+        case FEATURES_SWITCH_TYPE_INT64:
+            value->data.int64 = features_read_int64(switch_info->data);
+            break;
         case FEATURES_SWITCH_TYPE_INVALID:
+        default:
             return FEATURES_ERR_INVALID;
-            case FEATURES_TYPE_UINT
     }
+}
+
+#define FEATURE_RETURN_VALUE(expected_type, member)\
+    features_switch_value_t value;\
+    features_err_t rc;\
+    rc = features_switch_value(data,switch_number,value);\
+    if (FEATURES_OK == rc){\
+        if (expected_type != value.type) {\
+            rc = FEATURES_ERR_INCORRECT_TYPE;\
+        } else {\
+            *val = value.value.##member;\
+        }\
+    }\
+    return rc
+
+features_err_t
+features_switch_flag_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        char *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_FLAG, flag);
+}
+
+features_err_t
+features_switch_uint8_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        uint8_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_UINT8, uint8);
 }
 
 features_err_t
@@ -212,7 +273,7 @@ features_switch_uint16_value(
         const features_data_t *data,
         features_switch_number_t switch_number,
         uint16_t *val) {
-    
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_UINT16, uint16);
 }
 
 features_err_t
@@ -220,7 +281,7 @@ features_switch_uint32_value(
         const features_data_t *data,
         features_switch_number_t switch_number,
         uint32_t *val) {
-
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_UINT32, uint32);
 }
 
 features_err_t
@@ -228,7 +289,39 @@ features_switch_uint64_value(
         const features_data_t *data,
         features_switch_number_t switch_number,
         uint64_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_UINT64, uint64);
+}
 
+features_err_t
+features_switch_int8_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int8_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_INT8, int8);
+}
+
+features_err_t
+features_switch_int16_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int16_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_INT16, int16);
+}
+
+features_err_t
+features_switch_int32_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int32_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_INT32, int32);
+}
+
+features_err_t
+features_switch_int64_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int64_t *val) {
+    FEATURE_RETURN_VALUE(FEATURES_SWITCH_TYPE_INT64, int64);
 }
 
 static uint16_t

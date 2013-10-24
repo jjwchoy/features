@@ -72,6 +72,21 @@ typedef struct features_switch_id_t {
     uint8_t switch_number;
 } features_switch_id_t;
 
+typedef struct features_switch_value_t {
+    features_switch_type_t type;
+    union {
+        char flag;
+        uint8_t uint8;
+        uint16_t uint16;
+        uint32_t uint32;
+        uint64_t uint64;
+        int8_t int8;
+        int16_t int16;
+        int32_t int32;
+        int64_t int64;
+    } value;
+} features_switch_value_t;
+
 typedef struct features_block_t {
     features_switch_type_t type;
     uint8_t *switch_properties;
@@ -136,24 +151,64 @@ features_block(
         features_page_t *page,
         uint8_t block_number);
 
-uint8_t
+features_err_t
+features_switch_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        features_switch_value_t *value);
+
+features_err_t
+features_switch_flag_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        char *val);
+
+features_err_t
 features_switch_uint8_value(
         const features_data_t *data,
-        features_switch_number_t switch_number);
+        features_switch_number_t switch_number,
+        uint8_t *val);
 
-uint16_t
+features_err_t
 features_switch_uint16_value(
         const features_data_t *data,
-        features_switch_number_t switch_number);
+        features_switch_number_t switch_number,
+        uint16_t *val);
 
-uint32_t
+features_err_t
 features_switch_uint32_value(
         const features_data_t *data,
-        features_switch_number_t switch_number);
+        features_switch_number_t switch_number,
+        uint32_t *val);
 
-uint64_t
+features_err_t
 features_switch_uint64_value(
         const features_data_t *data,
-        features_switch_number_t switch_number);
+        features_switch_number_t switch_number,
+        uint64_t *val);
+
+features_err_t
+features_switch_int8_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int8_t *val);
+
+features_err_t
+features_switch_int16_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int16_t *val);
+
+features_err_t
+features_switch_int32_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int32_t *val);
+
+features_err_t
+features_switch_int64_value(
+        const features_data_t *data,
+        features_switch_number_t switch_number,
+        int64_t *val);
 
 #endif

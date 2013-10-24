@@ -3,8 +3,13 @@
 
 AC_PREREQ([2.68])
 AC_INIT([features], [0.1], [jjwchoy@gmail.con])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/config.h.in])
 AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_FILES([
+ Makefile
+ src/Makefile
+])
 
 # Checks for programs.
 AC_PROG_CC

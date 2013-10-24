@@ -145,7 +145,7 @@ features_block(
     // odd block number have the most significant nybble
 
     if (page_block_number % 2) {
-        type_byte <<= 4;
+        type_byte >>= 4;
     }
 
     block->type = (feature_switch_type_t)(type_byte & 0xf);
@@ -191,6 +191,7 @@ features_switch_value(
         features_switch_value_t *value) {
     features_switch_info_t switch_info;
     features_err_t rc;
+    uint8_t switch_properties;
 
     rc = features_switch_info(&switch_info, data, switch_number);
 
@@ -237,6 +238,19 @@ features_switch_value(
         default:
             return FEATURES_ERR_INVALID;
     }
+
+    switch_properties = value->switch_properties[switch_number / 4];
+    switch_properties >>= switch_number % 4;
+
+    if (!(switch_properties & 0x1)) {
+        return FEATURES_ERR_UNUSED;
+    }
+
+    if (switch_properties & 0x2) {
+        return FEATURES_ERR_DEPRECATED;
+    }
+
+    return FEATURES_OK;
 }
 
 #define FEATURE_RETURN_VALUE(expected_type, member)\
